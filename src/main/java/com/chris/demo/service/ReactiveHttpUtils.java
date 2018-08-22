@@ -17,7 +17,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
-public class HttpUtils {
+import io.reactivex.Observable;
+
+public class ReactiveHttpUtils {
 
 	public static final String UTF_8 = StandardCharsets.UTF_8.name();
 
@@ -25,21 +27,39 @@ public class HttpUtils {
 
 	private static final Pattern PARAMETERS_PATTERN = Pattern.compile("(?<==).+?(?=&\\w+=)");
 
-	public static String doGet(String url) throws IOException {
-		final String encodedUrl = encodeParameters(url);
+	public static Observable<String> doGet(String url) {
+		/**
+		 * <code>
+		 * Stream diagram: 
+		 * Url:		---url-|-> 
+		 * encoded: ---encodedUrl-|-> 
+		 * doGet : 	---doGet(encodedUrl)------|-> 
+		 * resp : 	--------------------jsonResp--|->
+		 * </code>
+		 */
+		return encodeParameters(url)//
+				.flatMap(ReactiveHttpUtils::executeRequest);//
+	}
 
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		// Timeout configurations
-		RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(CONNECTION_TIMEOUT_MS) //
-				.setConnectTimeout(CONNECTION_TIMEOUT_MS) //
-				.setSocketTimeout(CONNECTION_TIMEOUT_MS) //
-				.build();
-		HttpGet get = new HttpGet(encodedUrl);
-		get.setConfig(requestConfig);
+	private static Observable<String> executeRequest(String url) throws ClientProtocolException {
+		return Observable.create(emitter -> {
+			HttpClient httpClient = HttpClientBuilder.create().build();
 
-		String response = httpClient.execute(get, new MyResponseHandler());
-
-		return response;
+			// Timeout configurations
+			RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(CONNECTION_TIMEOUT_MS) //
+					.setConnectTimeout(CONNECTION_TIMEOUT_MS) //
+					.setSocketTimeout(CONNECTION_TIMEOUT_MS) //
+					.build();
+			HttpGet get = new HttpGet(url);
+			get.setConfig(requestConfig);
+			try {
+				String response = httpClient.execute(get, new MyResponseHandler());
+				emitter.onNext(response);
+				emitter.onComplete();
+			} catch (IOException e) {
+				emitter.onError(e);
+			}
+		});
 	}
 
 	private static class MyResponseHandler implements ResponseHandler<String> {
@@ -57,7 +77,8 @@ public class HttpUtils {
 
 	}
 
-	public static String encodeParameters(String url) {
+	public static Observable<String> encodeParameters(String url) {
+		String encodedUrl = url;
 		Matcher m = PARAMETERS_PATTERN.matcher(url + "&end=");
 		// UTF-8 encoding chartset
 		while (m.find()) {
@@ -67,16 +88,18 @@ public class HttpUtils {
 				 * Percent-encode values according the RFC 3986. The built-in Java URLEncoder
 				 * does not encode according to the RFC, so we make the extra replacements.
 				 */
-				String encParam = URLEncoder.encode(param, UTF_8).replace("+", "%20").replace("*", "%2A").replace("%7E",
-						"~");
-				url = url.replace(param, encParam);
+				String encParam = URLEncoder.encode(param, UTF_8)//
+						.replace("+", "%20")//
+						.replace("*", "%2A")//
+						.replace("%7E", "~");
+				encodedUrl = url.replace(param, encParam);
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(String
 						.format("Totally unexpected, %s is supposed to be an accepted character encoding.", UTF_8), e);
 			}
 		}
 
-		return url;
+		return Observable.just(encodedUrl);
 	}
 
 }
