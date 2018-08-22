@@ -16,8 +16,26 @@ public class AlbumFinder {
 			+ "&format=json"
 			+ "&api_key=" + LASTFM_KEY;
 	
+	private static final String ALBUMINFO_QUERY = "http://ws.audioscrobbler.com/2.0/"//
+			+ "?method=album.getInfo"//
+			+ "&album=%s"//
+			+ "&artist=%s"//
+			+ "&autocorrect=1"//
+			+ "&format=json"
+			+ "&api_key=" + LASTFM_KEY;
+	
 	public List<Album> findAlbum(String artistName) throws IOException {
 		String requestQuery = String.format(SEARCHALBUM_QUERY, artistName);
 		return LastFmParser.parseSearchAlbum(doGet(requestQuery));
+	}
+	
+	public Album getAlbumInfo(String artist, String albumName) throws IOException {
+		String requestQuery = String.format(ALBUMINFO_QUERY, albumName, artist);
+		return LastFmParser.parseAlbumInfo(doGet(requestQuery));
+	}
+	
+	public static void main(String[] args) throws IOException {
+		AlbumFinder af = new AlbumFinder();
+		System.out.println(af.getAlbumInfo("Nirvana", "Nevermind"));
 	}
 }
