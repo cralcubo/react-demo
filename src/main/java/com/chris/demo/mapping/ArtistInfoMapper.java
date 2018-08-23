@@ -1,4 +1,4 @@
-package com.chris.demo.map;
+package com.chris.demo.mapping;
 
 import java.util.List;
 

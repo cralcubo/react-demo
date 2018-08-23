@@ -7,12 +7,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import com.chris.demo.map.AlbumInfoMapper;
-import com.chris.demo.map.ArtistInfoMapper;
-import com.chris.demo.map.LastFmAlbum;
-import com.chris.demo.map.LastFmAlbum.Tracks;
-import com.chris.demo.map.LastFmImage;
-import com.chris.demo.map.TopAlbumMapper;
+import com.chris.demo.mapping.AlbumInfoMapper;
+import com.chris.demo.mapping.ArtistInfoMapper;
+import com.chris.demo.mapping.LastFmAlbum;
+import com.chris.demo.mapping.LastFmImage;
+import com.chris.demo.mapping.TopAlbumMapper;
+import com.chris.demo.mapping.LastFmAlbum.Tracks;
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
 import com.google.gson.Gson;
