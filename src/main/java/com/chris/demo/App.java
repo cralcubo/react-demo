@@ -1,19 +1,19 @@
 package com.chris.demo;
 
-import com.chris.demo.view.AlbumSearcher;
+import com.chris.demo.view.RootLayoutInitializer;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class App extends Application {
-	private AlbumSearcher searcher;
+	private RootLayoutInitializer rootLayoutInitializer;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		searcher = new AlbumSearcher(primaryStage);
-		searcher.initialize();
+		rootLayoutInitializer = new RootLayoutInitializer(primaryStage);
+		rootLayoutInitializer.initialize();
 		
-		searcher.show();
+		rootLayoutInitializer.show();
 	}
 	
 	public static void main(String[] args) {
