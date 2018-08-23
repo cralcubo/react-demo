@@ -13,6 +13,7 @@ public class ArtistInfoMapper {
 
 	public static class Bio {
 		public String summary;
+		public String content;
 	}
 
 }

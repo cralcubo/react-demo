@@ -10,21 +10,21 @@ public class Album {
 	private String name;
 	private String coverUrl;
 	private List<String> tracks;
-	private String info;
+	private Wiki wiki;
 
 	private Album(Builder builder) {
 		this.name = builder.name;
 		this.songName = builder.songName;
 		this.artistName = builder.artistName;
 		this.coverUrl = builder.coverUrl;
-		this.info = builder.info;
+		this.wiki = builder.wiki;
 		this.tracks = builder.tracks;
 	}
 
 	@Override
 	public String toString() {
 		return "Album [artistName=" + artistName + ", name=" + name + ", coverUrl=" + coverUrl + ", tracks=" + tracks
-				+ ", info=" + info + "]";
+				+ ", wiki=" + wiki + "]";
 	}
 
 	public String getSongName() {
@@ -42,6 +42,10 @@ public class Album {
 	public String getCoverUrl() {
 		return coverUrl;
 	}
+	
+	public Wiki getWiki() {
+		return wiki;
+	}
 
 	public static class Builder {
 		private String artistName;
@@ -49,10 +53,10 @@ public class Album {
 		private String name;
 		private String coverUrl;
 		private List<String> tracks;
-		private String info;
+		private Wiki wiki;
 		
-		public Builder info(String val) {
-			this.info = nullIsEmpty(val);
+		public Builder wiki(Wiki wiki) {
+			this.wiki = wiki;
 			return this;
 		}
 		

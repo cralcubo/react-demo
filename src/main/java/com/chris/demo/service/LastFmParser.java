@@ -11,7 +11,6 @@ import com.chris.demo.map.AlbumInfoMapper;
 import com.chris.demo.map.ArtistInfoMapper;
 import com.chris.demo.map.LastFmAlbum;
 import com.chris.demo.map.LastFmAlbum.Tracks;
-import com.chris.demo.map.LastFmAlbum.Wiki;
 import com.chris.demo.map.LastFmImage;
 import com.chris.demo.map.TopAlbumMapper;
 import com.chris.demo.model.Album;
@@ -38,8 +37,7 @@ public class LastFmParser {
 	private static final String LARGE_IMAGE = "extralarge";
 
 	public static Observable<Album> parseSearchAlbum(String jsonResponse) {
-		return Observable.just(jsonResponse)
-				.map(json -> gsonParser.fromJson(json, TopAlbumMapper.class))//
+		return Observable.just(jsonResponse).map(json -> gsonParser.fromJson(json, TopAlbumMapper.class))//
 				.filter(Objects::nonNull)//
 				.map(mapper -> mapper.topalbums)//
 				.flatMap(albums -> Observable.<LastFmAlbum>create(emitter -> {
@@ -54,22 +52,24 @@ public class LastFmParser {
 		return ofNullable(gsonParser.fromJson(jsonResponse, AlbumInfoMapper.class))//
 				.filter(Objects::nonNull)//
 				.map(mapper -> mapper.album)//
-				.filter(Objects::nonNull)
-				.map(LastFmParser::convertLastFmAlbumToAlbum)//
+				.filter(Objects::nonNull).map(LastFmParser::convertLastFmAlbumToAlbum)//
 				.orElse(null);
 	}
-	
+
 	public static Artist parseArtistInfo(String jsonResp) {
 		return ofNullable(gsonParser.fromJson(jsonResp, ArtistInfoMapper.class))//
-				.map(mapper -> mapper.artist)
-				.map(artist -> new Artist.Builder()//
+				.map(mapper -> mapper.artist).map(artist -> new Artist.Builder()//
 						.name(artist.name)//
-						.bio(ofNullable(artist.bio).map(b -> b.summary).orElse(null))//
+						.wiki(ofNullable(artist.bio)//
+								.map(b -> new com.chris.demo.model.Wiki.Builder()//
+										.content(b.content)//
+										.summary(b.summary)//
+										.build())//
+								.orElse(null))//
 						.pictureUrl(findCoverUrl(artist.image))//
 						.build())
 				.orElse(null);
 	}
-	
 
 	private static Album convertLastFmAlbumToAlbum(LastFmAlbum album) {
 		// No track info
@@ -78,15 +78,12 @@ public class LastFmParser {
 				.name(album.name)//
 				.coverUrl(findCoverUrl(album.image))//
 				.tracks(parseTracks(album.tracks))//
-				.info(parseWiki(album.wiki))//
+				.wiki(ofNullable(album.wiki).map(w -> new com.chris.demo.model.Wiki.Builder()//
+						.content(w.content)//
+						.summary(w.summary)//
+						.build())//
+						.orElse(null))//
 				.build();
-	}
-
-	private static String parseWiki(Wiki wiki) {
-		if (wiki == null) {
-			return null;
-		}
-		return wiki.summary;
 	}
 
 	private static List<String> parseTracks(Tracks tracks) {

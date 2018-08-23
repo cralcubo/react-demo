@@ -20,5 +20,6 @@ public class LastFmAlbum {
 	
 	public static class Wiki {
 		public String summary;
+		public String content;
 	}
 }

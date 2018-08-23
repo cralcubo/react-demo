@@ -3,12 +3,13 @@ package com.chris.demo.model;
 public class Artist {
 	private String name;
 	private String pictureUrl;
-	private String bio;
+	private Wiki wiki;
+	
 
 	private Artist(Builder b) {
 		this.name = b.name;
 		this.pictureUrl = b.pictureUrl;
-		this.bio = b.bio;
+		this.wiki = b.wiki;
 	}
 
 	public String getName() {
@@ -19,19 +20,19 @@ public class Artist {
 		return pictureUrl;
 	}
 
-	public String getBio() {
-		return bio;
+	public Wiki getWiki() {
+		return wiki;
 	}
 
 	@Override
 	public String toString() {
-		return "Artist [name=" + name + ", pictureUrl=" + pictureUrl + ", bio=" + bio.substring(0, 50) + "]";
+		return "Artist [name=" + name + ", pictureUrl=" + pictureUrl + ", wiki=" + wiki + "]";
 	}
 
 	public static class Builder {
 		private String name;
 		private String pictureUrl;
-		private String bio;
+		private Wiki wiki;
 
 		public Builder name(String val) {
 			name = nullIsEmpty(val);
@@ -43,8 +44,8 @@ public class Artist {
 			return this;
 		}
 
-		public Builder bio(String val) {
-			bio = nullIsEmpty(val);
+		public Builder wiki(Wiki wiki) {
+			this.wiki = wiki;
 			return this;
 		}
 		
