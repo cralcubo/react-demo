@@ -7,6 +7,9 @@ import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
 import com.chris.demo.model.SearchAlbumEntity;
 
+import io.reactivex.Observable;
+import io.reactivex.observables.ConnectableObservable;
+import io.reactivex.schedulers.Schedulers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -15,7 +18,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 
 public class RootLayoutController implements Controllable {
-	
+
 	// List here all the fxml elements to be controlled
 	/*
 	 * Search Pane
@@ -36,14 +39,14 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private AnchorPane albumsPane;
-	
+
 	// Controllers
 	private SearchPaneController searchPaneController;
 	private InfoPaneController infoPaneController;
 	private AlbumsPaneController albumsPaneController;
-	
+
 	private List<Controllable> controllers = new ArrayList<>();
-	
+
 	@FXML
 	public void initialize() {
 		searchPaneController = new SearchPaneController(searchText, searchButton);
@@ -52,10 +55,10 @@ public class RootLayoutController implements Controllable {
 		controllers.add(infoPaneController);
 		albumsPaneController = new AlbumsPaneController(albumsPane);
 		controllers.add(albumsPaneController);
-		//initialize all sub-controllers
+		// initialize all sub-controllers
 		controllers.forEach(Controllable::initialize);
 	}
-	
+
 	/*
 	 * Search Pane Actions
 	 */
@@ -64,19 +67,17 @@ public class RootLayoutController implements Controllable {
 		// clear up screens
 		clear();
 		// Search
-		SearchAlbumEntity entity = searchPaneController.searchAlbums();
-		// Handle artist
-		updateArtist(entity.getArtist());
-		// Albums
-		updateAlbums(entity.getAlbums());
+		Observable<Album> albums = searchPaneController.searchAlbums();
+		
+		Observable<Artist> artist = searchPaneController.searchArtist();
+		artist.subscribe(this::updateArtist);
 	}
-	
+
 	@FXML
 	private void clearTextAction() {
 		searchPaneController.clearText();
 	}
-	
-	
+
 	private void updateAlbums(List<Album> albums) {
 		albumsPaneController.loadAlbums(albums);
 	}

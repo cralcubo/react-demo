@@ -22,13 +22,13 @@ public class ReactiveAlbumFinder {
 			+ "&autocorrect=1"//
 			+ "&format=json" + "&api_key=" + LASTFM_KEY;
 
-	public static Observable<Album> findAlbums(String artistName) throws IOException {
+	public static Observable<Album> findAlbums(String artistName) {
 		return Observable.just(String.format(SEARCHALBUM_QUERY, artistName))//
 				.flatMap(ReactiveHttpUtils::doGet)//
 				.flatMap(LastFmParser::parseSearchAlbum);
 	}
 
-	public static Observable<Album> getAlbumInfo(String artist, String albumName) throws IOException {
+	public static Observable<Album> getAlbumInfo(String artist, String albumName) {
 		return Observable.just(String.format(ALBUMINFO_QUERY, albumName, artist))//
 				.flatMap(ReactiveHttpUtils::doGet)//
 				.map(LastFmParser::parseAlbumInfo);
