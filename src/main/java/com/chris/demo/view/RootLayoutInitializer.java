@@ -33,7 +33,6 @@ public class RootLayoutInitializer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 	
 	public void show() {

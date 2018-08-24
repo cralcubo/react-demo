@@ -3,11 +3,12 @@ package com.chris.demo.service;
 import java.io.IOException;
 
 import com.chris.demo.model.Album;
+import com.chris.demo.view.utils.PropertiesReader;
 
 import io.reactivex.Observable;
 
 public class ReactiveAlbumFinder {
-	private static final String LASTFM_KEY = "1742b8af939810b56dea71f6f060208d";
+	private static final String LASTFM_KEY = PropertiesReader.get("api.key");
 
 	private static final String SEARCHALBUM_QUERY = "http://ws.audioscrobbler.com/2.0/"//
 			+ "?method=artist.gettopalbums"//

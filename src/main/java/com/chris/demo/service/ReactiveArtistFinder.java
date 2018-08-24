@@ -1,11 +1,12 @@
 package com.chris.demo.service;
 
 import com.chris.demo.model.Artist;
+import com.chris.demo.view.utils.PropertiesReader;
 
 import io.reactivex.Observable;
 
 public class ReactiveArtistFinder {
-	private static final String LASTFM_KEY = "1742b8af939810b56dea71f6f060208d";
+	private static final String LASTFM_KEY = PropertiesReader.get("api.key");
 
 	private static final String ARTISTINFO_QUERY = "http://ws.audioscrobbler.com/2.0/"//
 			+ "?method=artist.getInfo"//
@@ -18,5 +19,4 @@ public class ReactiveArtistFinder {
 				.flatMap(ReactiveHttpUtils::doGet)//
 				.map(LastFmParser::parseArtistInfo);
 	}
-
 }
