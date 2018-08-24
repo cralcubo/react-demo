@@ -39,4 +39,10 @@ public class InfoPaneController implements Controllable {
 				.ifPresent(text -> wikiPane.getChildren().add(text));
 	}
 
+	@Override
+	public void clear() {
+		imagePane.setImage(null);
+		wikiPane.getChildren().clear();
+	}
+
 }

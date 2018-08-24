@@ -30,6 +30,11 @@ public class SearchPaneController implements Controllable {
 	void clearText() {
 		searchText.clear();
 	}
+
+	@Override
+	public void clear() {
+		searchText.clear();
+	}
 	
 	
 

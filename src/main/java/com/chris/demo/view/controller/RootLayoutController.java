@@ -1,12 +1,12 @@
 package com.chris.demo.view.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
 import com.chris.demo.model.SearchAlbumEntity;
 
-import io.reactivex.Observable;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -42,16 +42,18 @@ public class RootLayoutController implements Controllable {
 	private InfoPaneController infoPaneController;
 	private AlbumsPaneController albumsPaneController;
 	
+	private List<Controllable> controllers = new ArrayList<>();
+	
 	@FXML
 	public void initialize() {
 		searchPaneController = new SearchPaneController(searchText, searchButton);
-		searchPaneController.initialize();
-		
+		controllers.add(searchPaneController);
 		infoPaneController = new InfoPaneController(imagePane, wikiPane);
-		infoPaneController.initialize();
-		
+		controllers.add(infoPaneController);
 		albumsPaneController = new AlbumsPaneController(albumsPane);
-		albumsPaneController.initialize();
+		controllers.add(albumsPaneController);
+		//initialize all sub-controllers
+		controllers.forEach(Controllable::initialize);
 	}
 	
 	/*
@@ -59,6 +61,9 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private void searchAction() {
+		// clear up screens
+		clear();
+		// Search
 		SearchAlbumEntity entity = searchPaneController.searchAlbums();
 		// Handle artist
 		updateArtist(entity.getArtist());
@@ -73,15 +78,16 @@ public class RootLayoutController implements Controllable {
 	
 	
 	private void updateAlbums(List<Album> albums) {
-		// TODO Auto-generated method stub
-		
+		albumsPaneController.loadAlbums(albums);
 	}
 
 	private void updateArtist(Artist artist) {
 		infoPaneController.updateArtist(artist);
 	}
 
-	
-	
+	@Override
+	public void clear() {
+		controllers.forEach(Controllable::clear);
+	}
 
 }
