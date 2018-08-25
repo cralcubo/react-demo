@@ -1,23 +1,20 @@
 package com.chris.demo.view.controller;
 
+import com.chris.demo.api.Searcheable;
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
-import com.chris.demo.model.SearchAlbumEntity;
-import com.chris.demo.service.ReactiveAlbumFinder;
-import com.chris.demo.service.ReactiveArtistFinder;
-import com.chris.demo.view.utils.Mock;
 
 import io.reactivex.Observable;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
 public class SearchPaneController implements Controllable {
-	private final SearchAlbumEntity mock = Mock.loadEntity();
-
+	
 	private final TextArea searchText;
+	private Searcheable searcher;
 
-	public SearchPaneController(TextArea searchText, Button searchButton) {
+	public SearchPaneController(TextArea searchText, Searcheable searcher) {
 		this.searchText = searchText;
+		this.searcher = searcher;
 	}
 
 	@Override
@@ -25,11 +22,7 @@ public class SearchPaneController implements Controllable {
 		searchText.clear();
 	}
 	
-	Observable<Album> searchAlbums() {
-		return ReactiveAlbumFinder.findAlbums(searchText.getText());
-	}
-
-	void clearText() {
+	public void clearText() {
 		searchText.clear();
 	}
 
@@ -39,9 +32,10 @@ public class SearchPaneController implements Controllable {
 	}
 
 	public Observable<Artist> searchArtist() {
-		return ReactiveArtistFinder.getArtistInfo(searchText.getText());
+		return searcher.getArtistInfo(searchText.getText());
 	}
 	
-	
-
+	Observable<Album> searchAlbums() {
+		return searcher.getArtistAlbums(searchText.getText());
+	}
 }

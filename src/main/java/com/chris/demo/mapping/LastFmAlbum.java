@@ -5,7 +5,6 @@ import java.util.List;
 
 public class LastFmAlbum {
 	public String name;
-	public String artist;
 	public List<LastFmImage> image = new ArrayList<>();
 	public Wiki wiki;
 	public Tracks tracks;

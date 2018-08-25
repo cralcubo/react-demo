@@ -50,6 +50,7 @@ public class ReactiveHttpUtils {
 					.setConnectTimeout(CONNECTION_TIMEOUT_MS) //
 					.setSocketTimeout(CONNECTION_TIMEOUT_MS) //
 					.build();
+			System.out.println(".:.URL=" + url);
 			HttpGet get = new HttpGet(url);
 			get.setConfig(requestConfig);
 			try {
@@ -92,7 +93,7 @@ public class ReactiveHttpUtils {
 						.replace("+", "%20")//
 						.replace("*", "%2A")//
 						.replace("%7E", "~");
-				encodedUrl = url.replace(param, encParam);
+				encodedUrl = encodedUrl.replace(param, encParam);
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(String
 						.format("Totally unexpected, %s is supposed to be an accepted character encoding.", UTF_8), e);

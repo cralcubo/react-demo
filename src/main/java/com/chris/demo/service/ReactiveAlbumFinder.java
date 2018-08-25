@@ -1,7 +1,5 @@
 package com.chris.demo.service;
 
-import java.io.IOException;
-
 import com.chris.demo.model.Album;
 import com.chris.demo.view.utils.PropertiesReader;
 

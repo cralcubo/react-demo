@@ -1,23 +1,20 @@
 package com.chris.demo.view.controller;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Objects;
 
 import com.chris.demo.model.Album;
 
+import io.reactivex.Observable;
 import javafx.geometry.Insets;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 
 public class AlbumsPaneController implements Controllable {
 
 	private AnchorPane albumsPane;
+	private FlowPane flowPane;
 
 	public AlbumsPaneController(AnchorPane albumsPane) {
 		this.albumsPane = albumsPane;
@@ -25,64 +22,30 @@ public class AlbumsPaneController implements Controllable {
 
 	@Override
 	public void initialize() {
-		albumsPane.getChildren().clear();
+		flowPane = new FlowPane();
+		flowPane.setPadding(new Insets(5, 0, 5, 0));
+		flowPane.setVgap(4);
+		flowPane.setHgap(4);
+		flowPane.setPrefWrapLength(400); // preferred width allows for two columns
 	}
 
 	@Override
 	public void clear() {
 		albumsPane.getChildren().clear();
+		flowPane.getChildren().clear();
 	}
 
-	public void loadAlbums(List<Album> albums) {
-		FlowPane flow = new FlowPane();
-		flow.setPadding(new Insets(5, 0, 5, 0));
-	    flow.setVgap(4);
-	    flow.setHgap(4);
-	    flow.setPrefWrapLength(200); // preferred width allows for two columns
+	public void loadAlbums(Observable<Album> albums) {
+		albums.filter(Objects::nonNull)//
+				.map(Album::getCoverUrl)//
+				.filter(Objects::nonNull)//
+				.filter(url -> url.trim().matches("^https?:\\/\\/.+$"))//
+				.map(imageUrl -> new ImageView(new Image(imageUrl, 300, 300, false, false)))//
+				.take(4)//
+				.subscribe(image -> {flowPane.getChildren().add(image);},// 
+						e -> System.out.println(e.getMessage()));
 		
-		albums.stream()//
-				.map(AlbumPane::new)
-				.map(AlbumPane::createPane)
-				.forEach(p -> flow.getChildren().add(p));
-		
-		albumsPane.getChildren().add(flow);
-	}
-
-	private static class AlbumPane {
-		private final String imageUrl;
-		private final List<String> tracks;
-		private final String albumInfo;
-
-		public AlbumPane(Album a) {
-			this.imageUrl = a.getCoverUrl();
-			this.tracks = Collections.emptyList();
-			this.albumInfo = a.getWiki().getSummary();
-		}
-
-		SplitPane createPane() {
-			SplitPane splitPane = new SplitPane();
-			splitPane.setPrefWidth(400);
-			splitPane.setPrefHeight(200);
-			
-			AnchorPane leftAnchor = new AnchorPane();
-			ImageView image = new ImageView(new Image(imageUrl, 200, 200, false, false));
-			leftAnchor.getChildren().add(image);
-			splitPane.getItems().add(leftAnchor);
-
-			AnchorPane rightAnchor = new AnchorPane();
-			ScrollPane scrollPane = new ScrollPane();
-			scrollPane.setPrefWidth(200);
-			rightAnchor.getChildren().add(scrollPane);
-			
-			AnchorPane infoAnchor = new AnchorPane();
-			scrollPane.setContent(infoAnchor);
-			TextFlow text = new TextFlow(new Text(albumInfo));
-			infoAnchor.getChildren().add(text);
-			splitPane.getItems().add(rightAnchor);
-
-			return splitPane;
-		}
-
+		albumsPane.getChildren().add(flowPane);
 	}
 
 }

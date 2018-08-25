@@ -34,31 +34,40 @@ import io.reactivex.Observable;
 public class LastFmParser {
 
 	private static final Gson gsonParser = new Gson();
-	private static final String LARGE_IMAGE = "extralarge";
+	private static final String IMAGE_SIZE = "extralarge";
 
 	public static Observable<Album> parseSearchAlbum(String jsonResponse) {
-		return Observable.just(jsonResponse).map(json -> gsonParser.fromJson(json, TopAlbumMapper.class))//
-				.filter(Objects::nonNull)//
+		System.out.println(".:. Response:" + jsonResponse);
+		return Observable.just(jsonResponse)//
+				.map(json -> gsonParser.fromJson(json, TopAlbumMapper.class))//
 				.map(mapper -> mapper.topalbums)//
+				.filter(Objects::nonNull)//
 				.flatMap(albums -> Observable.<LastFmAlbum>create(emitter -> {
-					albums.album.forEach(emitter::onNext);
+					albums.album.stream()//
+							.filter(Objects::nonNull)//
+							.forEach(emitter::onNext);
 					emitter.onComplete();
 				}))//
-				.filter(Objects::nonNull)//
 				.map(LastFmParser::convertLastFmAlbumToAlbum);
 	}
 
 	public static Album parseAlbumInfo(String jsonResponse) {
+		System.out.println(".:. Response:" + jsonResponse);
 		return ofNullable(gsonParser.fromJson(jsonResponse, AlbumInfoMapper.class))//
-				.filter(Objects::nonNull)//
 				.map(mapper -> mapper.album)//
-				.filter(Objects::nonNull).map(LastFmParser::convertLastFmAlbumToAlbum)//
+				.filter(Objects::nonNull)//
+				.map(LastFmParser::convertLastFmAlbumToAlbum)//
 				.orElse(null);
 	}
 
 	public static Artist parseArtistInfo(String jsonResp) {
+		System.out.println(".:. Response:" + jsonResp);
+		ArtistInfoMapper fromJson = gsonParser.fromJson(jsonResp, ArtistInfoMapper.class);
+		System.out.println(fromJson);
 		return ofNullable(gsonParser.fromJson(jsonResp, ArtistInfoMapper.class))//
-				.map(mapper -> mapper.artist).map(artist -> new Artist.Builder()//
+				.map(mapper -> mapper.artist)//
+				.filter(Objects::nonNull)
+				.map(artist -> new Artist.Builder()//
 						.name(artist.name)//
 						.wiki(ofNullable(artist.bio)//
 								.map(b -> new com.chris.demo.model.Wiki.Builder()//
@@ -74,7 +83,6 @@ public class LastFmParser {
 	private static Album convertLastFmAlbumToAlbum(LastFmAlbum album) {
 		// No track info
 		return new Album.Builder()//
-				.artistName(album.artist)//
 				.name(album.name)//
 				.coverUrl(findCoverUrl(album.image))//
 				.tracks(parseTracks(album.tracks))//
@@ -100,7 +108,7 @@ public class LastFmParser {
 			if (i == null) {
 				continue;
 			}
-			if (i.size.equals(LARGE_IMAGE)) {
+			if (i.size.equals(IMAGE_SIZE)) {
 				return imageCleaner(i.url);
 			}
 		}

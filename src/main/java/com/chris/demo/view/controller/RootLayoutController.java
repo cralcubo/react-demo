@@ -3,13 +3,12 @@ package com.chris.demo.view.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.chris.demo.api.LastFmSearcher;
+import com.chris.demo.api.Searcheable;
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
-import com.chris.demo.model.SearchAlbumEntity;
 
 import io.reactivex.Observable;
-import io.reactivex.observables.ConnectableObservable;
-import io.reactivex.schedulers.Schedulers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -45,11 +44,14 @@ public class RootLayoutController implements Controllable {
 	private InfoPaneController infoPaneController;
 	private AlbumsPaneController albumsPaneController;
 
+	// private final Searcheable searcher = new SearchMock();
+	private final Searcheable searcher = new LastFmSearcher();
+
 	private List<Controllable> controllers = new ArrayList<>();
 
 	@FXML
 	public void initialize() {
-		searchPaneController = new SearchPaneController(searchText, searchButton);
+		searchPaneController = new SearchPaneController(searchText, searcher);
 		controllers.add(searchPaneController);
 		infoPaneController = new InfoPaneController(imagePane, wikiPane);
 		controllers.add(infoPaneController);
@@ -64,26 +66,18 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private void searchAction() {
-		// clear up screens
-		clear();
 		// Search
 		Observable<Album> albums = searchPaneController.searchAlbums();
-		
+		albumsPaneController.loadAlbums(albums);
+
 		Observable<Artist> artist = searchPaneController.searchArtist();
-		artist.subscribe(this::updateArtist);
-	}
+		artist.subscribe(infoPaneController::updateArtist, //
+				e -> infoPaneController.loadDefaultArtist(searchText.getText()));
+		}
 
 	@FXML
 	private void clearTextAction() {
-		searchPaneController.clearText();
-	}
-
-	private void updateAlbums(List<Album> albums) {
-		albumsPaneController.loadAlbums(albums);
-	}
-
-	private void updateArtist(Artist artist) {
-		infoPaneController.updateArtist(artist);
+		clear();
 	}
 
 	@Override

@@ -22,6 +22,17 @@ public class Mock {
 		
 		return new SearchAlbumEntity(loadAlbums(), artist);
 	}
+	
+	public static Artist loadArtist() {
+		return new Artist.Builder()
+		.name("Nirvana")
+		.pictureUrl("http://dazedimg.dazedgroup.netdna-cdn.com/786/azure/dazed-prod/1220/9/1229141.jpg")
+		.wiki(new Wiki.Builder()
+				.content("This is a mocked content")
+				.summary("This is a summary =D")
+				.build())
+		.build();
+	}
 
 	public static List<Album> loadAlbums() {
 		Album a1 = new Album.Builder()//
