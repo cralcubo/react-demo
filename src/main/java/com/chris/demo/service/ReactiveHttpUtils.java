@@ -50,7 +50,6 @@ public class ReactiveHttpUtils {
 					.setConnectTimeout(CONNECTION_TIMEOUT_MS) //
 					.setSocketTimeout(CONNECTION_TIMEOUT_MS) //
 					.build();
-			System.out.println(".:.URL=" + url);
 			HttpGet get = new HttpGet(url);
 			get.setConfig(requestConfig);
 			try {

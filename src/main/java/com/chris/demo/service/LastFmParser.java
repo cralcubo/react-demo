@@ -62,8 +62,6 @@ public class LastFmParser {
 
 	public static Artist parseArtistInfo(String jsonResp) {
 		System.out.println(".:. Response:" + jsonResp);
-		ArtistInfoMapper fromJson = gsonParser.fromJson(jsonResp, ArtistInfoMapper.class);
-		System.out.println(fromJson);
 		return ofNullable(gsonParser.fromJson(jsonResp, ArtistInfoMapper.class))//
 				.map(mapper -> mapper.artist)//
 				.filter(Objects::nonNull)
