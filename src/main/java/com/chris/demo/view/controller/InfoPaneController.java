@@ -11,7 +11,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 public class InfoPaneController implements Controllable {
-	private static final String defaultImage = "http://mikestratton.net/images/java_duke.png";
 
 	private ImageView imagePane;
 	private TextFlow wikiPane;
@@ -24,12 +23,6 @@ public class InfoPaneController implements Controllable {
 	@Override
 	public void initialize() {
 		// clear image pane
-	}
-	
-	public void loadDefaultArtist(String artistName) {
-		imagePane.setImage(new Image(defaultImage));
-		wikiPane.getChildren().clear();
-		wikiPane.getChildren().add(new Text("The Artist:" + artistName + " could not be found."));
 	}
 
 	public void updateArtist(Artist artist) {

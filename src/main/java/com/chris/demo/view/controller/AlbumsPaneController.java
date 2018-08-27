@@ -43,10 +43,13 @@ public class AlbumsPaneController implements Controllable {
 				.filter(url -> url.trim().matches("^https?:\\/\\/.+$"))//
 				.map(imageUrl -> new ImageView(new Image(imageUrl, 300, 300, false, false)))//
 				.take(4)//
+				.onErrorResumeNext(e -> {
+					System.err.println("ERROR:" + e.getMessage());
+					return Observable.empty();
+				})//
 				.observeOn(JavaFxScheduler.platform())//
-				.subscribe(image -> {flowPane.getChildren().add(image);},// 
-						e -> System.out.println(e.getMessage()));
-		
+				.subscribe(image -> flowPane.getChildren().add(image));
+
 		albumsPane.getChildren().add(flowPane);
 	}
 

@@ -2,7 +2,7 @@ package com.chris.demo.mapping;
 
 import java.util.List;
 
-public class ArtistInfoMapper {
+public class ArtistInfoMapper extends Errorable {
 	public Artist artist;
 
 	public static class Artist {

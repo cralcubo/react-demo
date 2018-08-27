@@ -1,5 +1,7 @@
 package com.chris.demo.service;
 
+import static java.lang.String.format;
+
 import com.chris.demo.model.Artist;
 import com.chris.demo.view.utils.PropertiesReader;
 
@@ -16,9 +18,9 @@ public class ReactiveArtistFinder {
 			+ "&format=json" + "&api_key=" + LASTFM_KEY;
 
 	public static Observable<Artist> getArtistInfo(String artistName) {
-		return Observable.just(String.format(ARTISTINFO_QUERY, artistName))//
+		return Observable.just(format(ARTISTINFO_QUERY, artistName))//
 				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
-				.map(LastFmParser::parseArtistInfo);
+				.flatMap(LastFmParser::parseArtistInfo);
 	}
 }

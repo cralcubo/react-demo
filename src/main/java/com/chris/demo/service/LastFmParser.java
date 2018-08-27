@@ -9,10 +9,11 @@ import java.util.Objects;
 
 import com.chris.demo.mapping.AlbumInfoMapper;
 import com.chris.demo.mapping.ArtistInfoMapper;
+import com.chris.demo.mapping.Errorable;
 import com.chris.demo.mapping.LastFmAlbum;
+import com.chris.demo.mapping.LastFmAlbum.Tracks;
 import com.chris.demo.mapping.LastFmImage;
 import com.chris.demo.mapping.TopAlbumMapper;
-import com.chris.demo.mapping.LastFmAlbum.Tracks;
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
 import com.google.gson.Gson;
@@ -35,11 +36,16 @@ public class LastFmParser {
 
 	private static final Gson gsonParser = new Gson();
 	private static final String IMAGE_SIZE = "extralarge";
-
+	
+	private static <T extends Errorable> Observable<T> parseJson(String json, Class<T> type) {
+		return Observable.just(json)//
+				.map(j -> gsonParser.fromJson(j, type))//
+				.filter(obj -> !obj.hasError()); // Only stream the responses without errors
+	}
+	
 	public static Observable<Album> parseSearchAlbum(String jsonResponse) {
 		System.out.println(".:. Response:" + jsonResponse);
-		return Observable.just(jsonResponse)//
-				.map(json -> gsonParser.fromJson(json, TopAlbumMapper.class))//
+		return parseJson(jsonResponse, TopAlbumMapper.class)//
 				.map(mapper -> mapper.topalbums)//
 				.filter(Objects::nonNull)//
 				.flatMap(albums -> Observable.<LastFmAlbum>create(emitter -> {
@@ -51,20 +57,17 @@ public class LastFmParser {
 				.map(LastFmParser::convertLastFmAlbumToAlbum);
 	}
 
-	public static Album parseAlbumInfo(String jsonResponse) {
+	public static Observable<Album> parseAlbumInfo(String jsonResponse) {
 		System.out.println(".:. Response:" + jsonResponse);
-		return ofNullable(gsonParser.fromJson(jsonResponse, AlbumInfoMapper.class))//
+		return parseJson(jsonResponse, AlbumInfoMapper.class)//
 				.map(mapper -> mapper.album)//
-				.filter(Objects::nonNull)//
-				.map(LastFmParser::convertLastFmAlbumToAlbum)//
-				.orElse(null);
+				.map(LastFmParser::convertLastFmAlbumToAlbum);
 	}
 
-	public static Artist parseArtistInfo(String jsonResp) {
+	public static Observable<Artist> parseArtistInfo(String jsonResp) {
 		System.out.println(".:. Response:" + jsonResp);
-		return ofNullable(gsonParser.fromJson(jsonResp, ArtistInfoMapper.class))//
+		return parseJson(jsonResp, ArtistInfoMapper.class)//
 				.map(mapper -> mapper.artist)//
-				.filter(Objects::nonNull)
 				.map(artist -> new Artist.Builder()//
 						.name(artist.name)//
 						.wiki(ofNullable(artist.bio)//
@@ -74,8 +77,7 @@ public class LastFmParser {
 										.build())//
 								.orElse(null))//
 						.pictureUrl(findCoverUrl(artist.image))//
-						.build())
-				.orElse(null);
+						.build());
 	}
 
 	private static Album convertLastFmAlbumToAlbum(LastFmAlbum album) {

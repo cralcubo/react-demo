@@ -32,6 +32,6 @@ public class ReactiveAlbumFinder {
 		return Observable.just(String.format(ALBUMINFO_QUERY, albumName, artist))//
 				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
-				.map(LastFmParser::parseAlbumInfo);
+				.flatMap(LastFmParser::parseAlbumInfo);
 	}
 }

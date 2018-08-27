@@ -7,6 +7,7 @@ import com.chris.demo.api.LastFmSearcher;
 import com.chris.demo.api.Searcheable;
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
+import com.chris.demo.model.Wiki;
 
 import io.reactivex.Observable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
@@ -67,15 +68,28 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private void searchAction() {
-		// Search
+		String defaultImage = "http://mikestratton.net/images/java_duke.png";
+
+		// Search Artist
+		searchPaneController.searchArtist()//
+				.defaultIfEmpty(new Artist.Builder().name("Unknown")//
+						.pictureUrl(defaultImage)//
+						.wiki(new Wiki.Builder()//
+								.content("Artist not found")//
+								.summary("Artist not found")//
+								.build())
+						.build())//
+				.onErrorResumeNext(e -> {
+					System.err.println("ERROR:" + e.getMessage());
+					return Observable.empty();
+				})//
+				.observeOn(JavaFxScheduler.platform())//
+				.subscribe(infoPaneController::updateArtist);
+
+		// Search artist albums
 		Observable<Album> albums = searchPaneController.searchAlbums();
 		albumsPaneController.loadAlbums(albums);
-
-		Observable<Artist> artist = searchPaneController.searchArtist();
-		artist.observeOn(JavaFxScheduler.platform())//
-		.subscribe(infoPaneController::updateArtist, //
-				e -> infoPaneController.loadDefaultArtist(searchText.getText()));
-		}
+	}
 
 	@FXML
 	private void clearTextAction() {
