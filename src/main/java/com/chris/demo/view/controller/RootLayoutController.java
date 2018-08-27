@@ -9,6 +9,7 @@ import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
 
 import io.reactivex.Observable;
+import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -71,7 +72,8 @@ public class RootLayoutController implements Controllable {
 		albumsPaneController.loadAlbums(albums);
 
 		Observable<Artist> artist = searchPaneController.searchArtist();
-		artist.subscribe(infoPaneController::updateArtist, //
+		artist.observeOn(JavaFxScheduler.platform())//
+		.subscribe(infoPaneController::updateArtist, //
 				e -> infoPaneController.loadDefaultArtist(searchText.getText()));
 		}
 

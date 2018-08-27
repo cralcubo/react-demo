@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.chris.demo.model.Album;
 
 import io.reactivex.Observable;
+import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -42,6 +43,7 @@ public class AlbumsPaneController implements Controllable {
 				.filter(url -> url.trim().matches("^https?:\\/\\/.+$"))//
 				.map(imageUrl -> new ImageView(new Image(imageUrl, 300, 300, false, false)))//
 				.take(4)//
+				.observeOn(JavaFxScheduler.platform())//
 				.subscribe(image -> {flowPane.getChildren().add(image);},// 
 						e -> System.out.println(e.getMessage()));
 		

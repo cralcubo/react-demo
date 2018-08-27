@@ -4,6 +4,7 @@ import com.chris.demo.model.Album;
 import com.chris.demo.view.utils.PropertiesReader;
 
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ReactiveAlbumFinder {
 	private static final String LASTFM_KEY = PropertiesReader.get("api.key");
@@ -22,12 +23,14 @@ public class ReactiveAlbumFinder {
 
 	public static Observable<Album> findAlbums(String artistName) {
 		return Observable.just(String.format(SEARCHALBUM_QUERY, artistName))//
+				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
 				.flatMap(LastFmParser::parseSearchAlbum);
 	}
 
 	public static Observable<Album> getAlbumInfo(String artist, String albumName) {
 		return Observable.just(String.format(ALBUMINFO_QUERY, albumName, artist))//
+				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
 				.map(LastFmParser::parseAlbumInfo);
 	}
