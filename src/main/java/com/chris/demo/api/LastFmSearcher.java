@@ -23,5 +23,4 @@ public class LastFmSearcher implements Searcheable {
 	public Observable<Album> getArtistAlbums(String artistName) {
 		return ReactiveAlbumFinder.findAlbums(artistName);
 	}
-
 }

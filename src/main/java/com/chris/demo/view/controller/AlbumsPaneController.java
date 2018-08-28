@@ -47,7 +47,7 @@ public class AlbumsPaneController implements Controllable {
 					System.err.println("ERROR:" + e.getMessage());
 					return Observable.empty();
 				})//
-				.observeOn(JavaFxScheduler.platform())//
+//				.observeOn(JavaFxScheduler.platform())//
 				.subscribe(image -> flowPane.getChildren().add(image));
 
 		albumsPane.getChildren().add(flowPane);
