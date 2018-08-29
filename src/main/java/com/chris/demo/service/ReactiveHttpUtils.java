@@ -30,11 +30,10 @@ public class ReactiveHttpUtils {
 	public static Observable<String> doGet(String url) {
 		/**
 		 * <code>
-		 * Stream diagram: 
-		 * Url:		---url-|-> 
-		 * encoded: ---encodedUrl-|-> 
-		 * doGet : 	---doGet(encodedUrl)------|-> 
-		 * resp : 	--------------------jsonResp--|->
+		 * Stream diagram
+		 * encoded stream:   ------------encodedUrl-------------------|->
+		 * 					 vvvvvvvvvvv flatMap(executeRequest) vvvvv 
+		 * response stream:  ----------------jsonResp-----------------|->
 		 * </code>
 		 */
 		return encodeParameters(url)//
