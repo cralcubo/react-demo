@@ -5,23 +5,9 @@ import java.util.List;
 
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
-import com.chris.demo.model.SearchAlbumEntity;
 import com.chris.demo.model.Wiki;
 
 public class Mock {
-	
-	public static SearchAlbumEntity loadEntity() {
-		Artist artist = new Artist.Builder()
-				.name("Nirvana")
-				.pictureUrl("http://dazedimg.dazedgroup.netdna-cdn.com/786/azure/dazed-prod/1220/9/1229141.jpg")
-				.wiki(new Wiki.Builder()
-						.content("This is a mocked content")
-						.summary("This is a summary =D")
-						.build())
-				.build();
-		
-		return new SearchAlbumEntity(loadAlbums(), artist);
-	}
 	
 	public static Artist loadArtist() {
 		return new Artist.Builder()

@@ -4,7 +4,7 @@ import static java.util.Collections.emptyList;
 
 import java.util.List;
 
-public class Album {
+public class Album implements Streamable {
 	private String songName;
 	private String artistName;
 	private String name;

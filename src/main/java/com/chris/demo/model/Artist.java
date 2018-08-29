@@ -1,6 +1,6 @@
 package com.chris.demo.model;
 
-public class Artist {
+public class Artist implements Streamable {
 	private String name;
 	private String pictureUrl;
 	private Wiki wiki;

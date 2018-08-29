@@ -7,9 +7,11 @@ import com.chris.demo.api.LastFmSearcher;
 import com.chris.demo.api.Searcheable;
 import com.chris.demo.model.Album;
 import com.chris.demo.model.Artist;
+import com.chris.demo.model.Streamable;
 import com.chris.demo.model.Wiki;
 
 import io.reactivex.Observable;
+import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -19,6 +21,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 
 public class RootLayoutController implements Controllable {
+
+	private static final String DEFAULT_IMAGE = "http://mikestratton.net/images/java_duke.png";
 
 	// List here all the fxml elements to be controlled
 	/*
@@ -68,12 +72,43 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private void searchAction() {
-		String defaultImage = "http://mikestratton.net/images/java_duke.png";
+		// doChattySearch();
+		doReservedSearch2();
+	}
 
+	private void doReservedSearch() {
+		ConnectableObservable<Streamable> connectable = searchPaneController.returnAllSearchedInfo().publish();
+
+		connectable.filter(Artist.class::isInstance)//
+				.map(Artist.class::cast)//
+				.observeOn(JavaFxScheduler.platform())//
+				.subscribe(infoPaneController::updateArtist);
+
+		albumsPaneController.loadAlbums(connectable.filter(Album.class::isInstance)//
+				.map(Album.class::cast));
+
+		connectable.connect();
+	}
+
+	private void doReservedSearch2() {
+		searchPaneController.returnAllSearchedInfo()//
+				.groupBy(e -> (e instanceof Album) ? "album" : "artist")//
+				.observeOn(JavaFxScheduler.platform())//
+				.subscribe(g -> {
+					if (g.getKey().equals("album")) {
+						albumsPaneController.loadAlbums(g.map(Album.class::cast));
+					} else {
+						g.map(Artist.class::cast)//
+								.subscribe(infoPaneController::updateArtist);
+					}
+				});
+	}
+
+	private void doChattySearch() {
 		// Search Artist
 		searchPaneController.searchArtist()//
 				.defaultIfEmpty(new Artist.Builder().name("Unknown")//
-						.pictureUrl(defaultImage)//
+						.pictureUrl(DEFAULT_IMAGE)//
 						.wiki(new Wiki.Builder()//
 								.content("Artist not found")//
 								.summary("Artist not found")//
