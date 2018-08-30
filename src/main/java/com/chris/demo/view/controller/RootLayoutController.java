@@ -2,6 +2,7 @@ package com.chris.demo.view.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.chris.demo.api.LastFmSearcher;
 import com.chris.demo.api.Searcheable;
@@ -13,6 +14,7 @@ import com.chris.demo.model.Wiki;
 import io.reactivex.Observable;
 import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler;
+import io.reactivex.schedulers.Schedulers;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -77,7 +79,7 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private void searchAction() {
-		doChattySearch();
+		 doChattySearch();
 	}
 
 	private void doChattySearch() {
@@ -88,37 +90,66 @@ public class RootLayoutController implements Controllable {
 					System.err.println("ERROR:" + e.getMessage());
 					return Observable.empty();
 				})//
+				.subscribeOn(Schedulers.io())//
+				.doOnNext((a) -> System.out.println("Artist retrieved on: " + Thread.currentThread().getName()))
 				.observeOn(JavaFxScheduler.platform())//
 				.subscribe(infoPaneController::updateArtist);
 
 		// Search artist albums
-		Observable<Album> albums = searchPaneController.searchAlbums();
+		Observable<Album> albums = searchPaneController.searchAlbums()//
+				.filter(Objects::nonNull)//
+				.onErrorResumeNext(e -> {
+					System.err.println("ERROR:" + e.getMessage());
+					return Observable.empty();
+				})//
+				.subscribeOn(Schedulers.io())
+				.doOnNext((a) -> System.out.println("Albums retrieved on: " + Thread.currentThread().getName()));
+		
 		albumsPaneController.loadAlbums(albums);
 	}
 
-	private void doReservedSearch() {
+	private void doDirectSearch() {
 		ConnectableObservable<Streamable> connectable = searchPaneController.returnAllSearchedInfo().publish();
 
 		connectable.filter(Artist.class::isInstance)//
 				.cast(Artist.class)//
+				.defaultIfEmpty(ARTIST_NOT_FOUND)//
+				.onErrorResumeNext(e -> {
+					System.err.println("ERROR:" + e.getMessage());
+					return Observable.empty();
+				})//
 				.observeOn(JavaFxScheduler.platform())//
 				.subscribe(infoPaneController::updateArtist);
 
 		albumsPaneController.loadAlbums(connectable.filter(Album.class::isInstance)//
-				.cast(Album.class));
+				.cast(Album.class).filter(Objects::nonNull)//
+				.onErrorResumeNext(e -> {
+					System.err.println("ERROR:" + e.getMessage());
+					return Observable.empty();
+				}));
 
 		connectable.connect();
 	}
 
-	private void doReservedSearch2() {
+	private void doDirectSearch2() {
 		searchPaneController.returnAllSearchedInfo()//
 				.groupBy(e -> (e instanceof Album) ? "album" : "artist")//
 				.observeOn(JavaFxScheduler.platform())//
 				.subscribe(g -> {
 					if (g.getKey().equals("album")) {
-						albumsPaneController.loadAlbums(g.map(Album.class::cast));
+						albumsPaneController.loadAlbums(g.map(Album.class::cast)//
+								.filter(Objects::nonNull)//
+								.onErrorResumeNext(e -> {
+									System.err.println("ERROR:" + e.getMessage());
+									return Observable.empty();
+								}));
 					} else {
 						g.map(Artist.class::cast)//
+								.defaultIfEmpty(ARTIST_NOT_FOUND)//
+								.onErrorResumeNext(e -> {
+									System.err.println("ERROR:" + e.getMessage());
+									return Observable.empty();
+								})//
 								.subscribe(infoPaneController::updateArtist);
 					}
 				});

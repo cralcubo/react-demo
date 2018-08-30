@@ -6,7 +6,6 @@ import com.chris.demo.model.Artist;
 import com.chris.demo.view.utils.PropertiesReader;
 
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 
 public class ReactiveArtistFinder {
 	private static final String LASTFM_KEY = PropertiesReader.get("api.key");
@@ -20,8 +19,7 @@ public class ReactiveArtistFinder {
 	public static Observable<Artist> getArtistInfo(String artistName) {
 		return Observable.just(format(ARTISTINFO_QUERY, artistName))//
 				.flatMap(ReactiveHttpUtils::doGet)//
-				.flatMap(LastFmParser::parseArtistInfo)
-				.subscribeOn(Schedulers.io());
+				.flatMap(LastFmParser::parseArtistInfo);
 	}
 	
 }
