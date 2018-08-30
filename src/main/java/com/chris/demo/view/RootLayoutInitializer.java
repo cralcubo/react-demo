@@ -28,7 +28,7 @@ public class RootLayoutInitializer {
 			// Show the scene containing the root layout.
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
-			primaryStage.setTitle("Reactive Album Searcher");
+			primaryStage.setTitle("Reactive Artist Info Searcher");
 			primaryStage.setResizable(false);
 		} catch (IOException e) {
 			e.printStackTrace();

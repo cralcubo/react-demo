@@ -23,15 +23,15 @@ public class ReactiveAlbumFinder {
 
 	public static Observable<Album> findAlbums(String artistName) {
 		return Observable.just(String.format(SEARCHALBUM_QUERY, artistName))//
-				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
-				.flatMap(LastFmParser::parseSearchAlbum);
+				.flatMap(LastFmParser::parseSearchAlbum)//
+				.subscribeOn(Schedulers.io());
 	}
 
 	public static Observable<Album> getAlbumInfo(String artist, String albumName) {
 		return Observable.just(String.format(ALBUMINFO_QUERY, albumName, artist))//
-				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
-				.flatMap(LastFmParser::parseAlbumInfo);
+				.flatMap(LastFmParser::parseAlbumInfo)//
+				.subscribeOn(Schedulers.io());
 	}
 }

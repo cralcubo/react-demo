@@ -21,8 +21,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 
 public class RootLayoutController implements Controllable {
-
-	private static final String DEFAULT_IMAGE = "http://mikestratton.net/images/java_duke.png";
+	private static final Artist ARTIST_NOT_FOUND = new Artist.Builder().name("Unknown")//
+			.pictureUrl("http://mikestratton.net/images/java_duke.png")//
+			.wiki(new Wiki.Builder()//
+					.content("Artist not found")//
+					.summary("Artist not found")//
+					.build())
+			.build();
 
 	// List here all the fxml elements to be controlled
 	/*
@@ -72,20 +77,35 @@ public class RootLayoutController implements Controllable {
 	 */
 	@FXML
 	private void searchAction() {
-		// doChattySearch();
-		doReservedSearch2();
+		doChattySearch();
+	}
+
+	private void doChattySearch() {
+		// Search Artist
+		searchPaneController.searchArtist()//
+				.defaultIfEmpty(ARTIST_NOT_FOUND)//
+				.onErrorResumeNext(e -> {
+					System.err.println("ERROR:" + e.getMessage());
+					return Observable.empty();
+				})//
+				.observeOn(JavaFxScheduler.platform())//
+				.subscribe(infoPaneController::updateArtist);
+
+		// Search artist albums
+		Observable<Album> albums = searchPaneController.searchAlbums();
+		albumsPaneController.loadAlbums(albums);
 	}
 
 	private void doReservedSearch() {
 		ConnectableObservable<Streamable> connectable = searchPaneController.returnAllSearchedInfo().publish();
 
 		connectable.filter(Artist.class::isInstance)//
-				.map(Artist.class::cast)//
+				.cast(Artist.class)//
 				.observeOn(JavaFxScheduler.platform())//
 				.subscribe(infoPaneController::updateArtist);
 
 		albumsPaneController.loadAlbums(connectable.filter(Album.class::isInstance)//
-				.map(Album.class::cast));
+				.cast(Album.class));
 
 		connectable.connect();
 	}
@@ -102,28 +122,6 @@ public class RootLayoutController implements Controllable {
 								.subscribe(infoPaneController::updateArtist);
 					}
 				});
-	}
-
-	private void doChattySearch() {
-		// Search Artist
-		searchPaneController.searchArtist()//
-				.defaultIfEmpty(new Artist.Builder().name("Unknown")//
-						.pictureUrl(DEFAULT_IMAGE)//
-						.wiki(new Wiki.Builder()//
-								.content("Artist not found")//
-								.summary("Artist not found")//
-								.build())
-						.build())//
-				.onErrorResumeNext(e -> {
-					System.err.println("ERROR:" + e.getMessage());
-					return Observable.empty();
-				})//
-				.observeOn(JavaFxScheduler.platform())//
-				.subscribe(infoPaneController::updateArtist);
-
-		// Search artist albums
-		Observable<Album> albums = searchPaneController.searchAlbums();
-		albumsPaneController.loadAlbums(albums);
 	}
 
 	@FXML

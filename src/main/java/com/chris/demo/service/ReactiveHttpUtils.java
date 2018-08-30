@@ -77,28 +77,29 @@ public class ReactiveHttpUtils {
 	}
 
 	public static Observable<String> encodeParameters(String url) {
-		String encodedUrl = url;
-		Matcher m = PARAMETERS_PATTERN.matcher(url + "&end=");
-		// UTF-8 encoding chartset
-		while (m.find()) {
-			try {
-				String param = m.group();
-				/*
-				 * Percent-encode values according the RFC 3986. The built-in Java URLEncoder
-				 * does not encode according to the RFC, so we make the extra replacements.
-				 */
-				String encParam = URLEncoder.encode(param, UTF_8)//
-						.replace("+", "%20")//
-						.replace("*", "%2A")//
-						.replace("%7E", "~");
-				encodedUrl = encodedUrl.replace(param, encParam);
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(String
-						.format("Totally unexpected, %s is supposed to be an accepted character encoding.", UTF_8), e);
+		return Observable.create(emitter -> {
+			String encodedUrl = url;
+			Matcher m = PARAMETERS_PATTERN.matcher(url + "&end=");
+			// UTF-8 encoding chartset
+			while (m.find()) {
+				try {
+					String param = m.group();
+					/*
+					 * Percent-encode values according the RFC 3986. The built-in Java URLEncoder
+					 * does not encode according to the RFC, so we make the extra replacements.
+					 */
+					String encParam = URLEncoder.encode(param, UTF_8)//
+							.replace("+", "%20")//
+							.replace("*", "%2A")//
+							.replace("%7E", "~");
+					encodedUrl = encodedUrl.replace(param, encParam);
+				} catch (UnsupportedEncodingException e) {
+					emitter.onError(e);
+				}
 			}
-		}
-
-		return Observable.just(encodedUrl);
+			emitter.onNext(encodedUrl);
+			emitter.onComplete();
+		});
 	}
 
 }

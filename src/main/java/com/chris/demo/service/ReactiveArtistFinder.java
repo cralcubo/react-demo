@@ -19,8 +19,9 @@ public class ReactiveArtistFinder {
 
 	public static Observable<Artist> getArtistInfo(String artistName) {
 		return Observable.just(format(ARTISTINFO_QUERY, artistName))//
-				.subscribeOn(Schedulers.io())//
 				.flatMap(ReactiveHttpUtils::doGet)//
-				.flatMap(LastFmParser::parseArtistInfo);
+				.flatMap(LastFmParser::parseArtistInfo)
+				.subscribeOn(Schedulers.io());
 	}
+	
 }
